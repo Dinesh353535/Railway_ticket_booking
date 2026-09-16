@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b2545"/>
+      <stop offset="45%" stop-color="#1b4f8f"/>
+      <stop offset="75%" stop-color="#3f7fc1"/>
+      <stop offset="100%" stop-color="#f6b26b"/>
+    </linearGradient>
+
+    <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d4e78"/>
+      <stop offset="100%" stop-color="#14395a"/>
+    </linearGradient>
+
+    <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#123047"/>
+      <stop offset="100%" stop-color="#0b2233"/>
+    </linearGradient>
+
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d2b3f"/>
+      <stop offset="100%" stop-color="#061722"/>
+    </linearGradient>
+
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="55%" stop-color="#dbe6f2"/>
+      <stop offset="100%" stop-color="#9fb3c8"/>
+    </linearGradient>
+
+    <linearGradient id="stripe" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2c5d8a"/>
+      <stop offset="100%" stop-color="#0f2f4d"/>
+    </linearGradient>
+
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffd89b" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#f8a94b" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#f8a94b" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="lampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff7cc" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff7cc" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="vignette" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#03111c" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#03111c" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#03111c" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- STARS -->
+  <g fill="#ffffff" opacity="0.75">
+    <circle cx="140" cy="90" r="2.2"/>
+    <circle cx="300" cy="160" r="1.6"/>
+    <circle cx="460" cy="70" r="2"/>
+    <circle cx="620" cy="140" r="1.4"/>
+    <circle cx="780" cy="60" r="1.8"/>
+    <circle cx="940" cy="130" r="1.5"/>
+    <circle cx="1100" cy="80" r="2.1"/>
+    <circle cx="1260" cy="150" r="1.5"/>
+    <circle cx="1420" cy="70" r="1.9"/>
+    <circle cx="1520" cy="180" r="1.4"/>
+    <circle cx="220" cy="230" r="1.3"/>
+    <circle cx="1000" cy="220" r="1.2"/>
+  </g>
+
+  <!-- SUN GLOW -->
+  <circle cx="1180" cy="520" r="360" fill="url(#sunGlow)"/>
+  <circle cx="1180" cy="520" r="72" fill="#ffd9a0" opacity="0.9"/>
+
+  <!-- BACK HILLS -->
+  <path d="M0 560 L170 470 L300 540 L430 455 L560 545 L700 480 L840 555 L980 470 L1120 545 L1280 465 L1430 545 L1600 480 L1600 900 L0 900 Z" fill="url(#hillBack)"/>
+
+  <!-- FRONT HILLS -->
+  <path d="M0 640 L180 575 L340 645 L520 585 L690 655 L880 600 L1060 660 L1250 605 L1430 665 L1600 615 L1600 900 L0 900 Z" fill="url(#hillFront)"/>
+
+  <!-- GROUND -->
+  <rect y="690" width="1600" height="210" fill="url(#ground)"/>
+
+  <!-- POLES -->
+  <g stroke="#0a1d2b" stroke-width="7" opacity="0.85">
+    <line x1="120" y1="700" x2="120" y2="520"/>
+    <line x1="420" y1="700" x2="420" y2="530"/>
+    <line x1="1500" y1="700" x2="1500" y2="520"/>
+  </g>
+  <g stroke="#0a1d2b" stroke-width="5" opacity="0.85">
+    <line x1="80" y1="530" x2="160" y2="530"/>
+    <line x1="382" y1="540" x2="462" y2="540"/>
+    <line x1="1460" y1="530" x2="1540" y2="530"/>
+  </g>
+  <g stroke="#0a1d2b" stroke-width="3" opacity="0.6" fill="none">
+    <path d="M120 535 Q270 575 420 545"/>
+    <path d="M420 545 Q960 600 1500 535"/>
+  </g>
+
+  <!-- TRACK BED -->
+  <rect y="742" width="1600" height="60" fill="#132c3d"/>
+
+  <!-- SLEEPERS -->
+  <g fill="#0a1c28" opacity="0.9">
+    <rect x="20" y="752" width="46" height="40" rx="4"/>
+    <rect x="106" y="752" width="46" height="40" rx="4"/>
+    <rect x="192" y="752" width="46" height="40" rx="4"/>
+    <rect x="278" y="752" width="46" height="40" rx="4"/>
+    <rect x="364" y="752" width="46" height="40" rx="4"/>
+    <rect x="450" y="752" width="46" height="40" rx="4"/>
+    <rect x="536" y="752" width="46" height="40" rx="4"/>
+    <rect x="622" y="752" width="46" height="40" rx="4"/>
+    <rect x="708" y="752" width="46" height="40" rx="4"/>
+    <rect x="794" y="752" width="46" height="40" rx="4"/>
+    <rect x="880" y="752" width="46" height="40" rx="4"/>
+    <rect x="966" y="752" width="46" height="40" rx="4"/>
+    <rect x="1052" y="752" width="46" height="40" rx="4"/>
+    <rect x="1138" y="752" width="46" height="40" rx="4"/>
+    <rect x="1224" y="752" width="46" height="40" rx="4"/>
+    <rect x="1310" y="752" width="46" height="40" rx="4"/>
+    <rect x="1396" y="752" width="46" height="40" rx="4"/>
+    <rect x="1482" y="752" width="46" height="40" rx="4"/>
+  </g>
+
+  <!-- RAILS -->
+  <rect y="756" width="1600" height="8" fill="#9db4c8" opacity="0.9"/>
+  <rect y="784" width="1600" height="8" fill="#7f97ad" opacity="0.9"/>
+
+  <!-- HEADLIGHT GLOW -->
+  <ellipse cx="690" cy="690" rx="300" ry="150" fill="url(#lampGlow)" opacity="0.5"/>
+
+  <!-- TRAIN -->
+  <g>
+    <!-- coaches -->
+    <g>
+      <rect x="1020" y="520" width="250" height="210" rx="22" fill="url(#body)"/>
+      <rect x="1020" y="646" width="250" height="26" fill="url(#stripe)"/>
+      <rect x="1048" y="556" width="70" height="62" rx="9" fill="url(#glass)"/>
+      <rect x="1136" y="556" width="70" height="62" rx="9" fill="url(#glass)"/>
+      <rect x="1224" y="556" width="34" height="62" rx="9" fill="url(#glass)"/>
+
+      <rect x="1290" y="520" width="250" height="210" rx="22" fill="url(#body)"/>
+      <rect x="1290" y="646" width="250" height="26" fill="url(#stripe)"/>
+      <rect x="1318" y="556" width="70" height="62" rx="9" fill="url(#glass)"/>
+      <rect x="1406" y="556" width="70" height="62" rx="9" fill="url(#glass)"/>
+      <rect x="1494" y="556" width="34" height="62" rx="9" fill="url(#glass)"/>
+    </g>
+
+    <!-- engine -->
+    <path d="M620 730 L620 560 Q620 500 690 486 L960 470 Q1000 468 1000 512 L1000 730 Z" fill="url(#body)"/>
+    <path d="M620 646 L1000 646 L1000 676 L620 676 Z" fill="url(#stripe)"/>
+
+    <!-- windscreen -->
+    <path d="M652 566 Q652 526 700 518 L840 508 L840 596 L652 596 Z" fill="url(#glass)"/>
+    <rect x="874" y="516" width="96" height="76" rx="12" fill="url(#glass)"/>
+
+    <!-- nose detail -->
+    <path d="M620 700 L700 700 L700 730 L620 730 Z" fill="#c9d7e6"/>
+
+    <!-- headlights -->
+    <circle cx="648" cy="700" r="13" fill="#fff6cf"/>
+    <circle cx="648" cy="700" r="26" fill="url(#lampGlow)"/>
+
+    <!-- roof -->
+    <rect x="700" y="462" width="300" height="16" rx="8" fill="#94a9be"/>
+
+    <!-- skirt -->
+    <rect x="620" y="730" width="920" height="22" rx="8" fill="#16344a"/>
+
+    <!-- wheels -->
+    <g fill="#0a1c28">
+      <circle cx="712" cy="754" r="24"/>
+      <circle cx="800" cy="754" r="24"/>
+      <circle cx="950" cy="754" r="24"/>
+      <circle cx="1038" cy="754" r="24"/>
+      <circle cx="1212" cy="754" r="24"/>
+      <circle cx="1300" cy="754" r="24"/>
+      <circle cx="1470" cy="754" r="24"/>
+    </g>
+    <g fill="#4c667e">
+      <circle cx="712" cy="754" r="9"/>
+      <circle cx="800" cy="754" r="9"/>
+      <circle cx="950" cy="754" r="9"/>
+      <circle cx="1038" cy="754" r="9"/>
+      <circle cx="1212" cy="754" r="9"/>
+      <circle cx="1300" cy="754" r="9"/>
+      <circle cx="1470" cy="754" r="9"/>
+    </g>
+  </g>
+
+  <!-- FOREGROUND GRASS -->
+  <path d="M0 812 Q200 790 400 812 Q640 836 880 812 Q1160 788 1400 814 Q1520 826 1600 812 L1600 900 L0 900 Z" fill="#04131d"/>
+
+  <!-- LEFT VIGNETTE so the booking box text stays readable -->
+  <rect width="1600" height="900" fill="url(#vignette)"/>
+</svg>

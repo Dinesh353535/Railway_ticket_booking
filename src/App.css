@@ -1,0 +1,986 @@
+/* ==================================================
+   RAILBOOK - APP THEME
+   Built on top of Bootstrap 5 utilities
+================================================== */
+
+/* --------------------------------------------------
+   BOOTSTRAP COLOUR OVERRIDES
+-------------------------------------------------- */
+
+.btn-primary {
+  --bs-btn-bg: var(--rb-blue);
+  --bs-btn-border-color: var(--rb-blue);
+  --bs-btn-hover-bg: #0f51b0;
+  --bs-btn-hover-border-color: #0f51b0;
+  --bs-btn-active-bg: #0d4899;
+  --bs-btn-active-border-color: #0d4899;
+  --bs-btn-disabled-bg: #7fa9e8;
+  --bs-btn-disabled-border-color: #7fa9e8;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--rb-blue);
+  --bs-btn-border-color: var(--rb-blue);
+  --bs-btn-hover-bg: var(--rb-blue);
+  --bs-btn-hover-border-color: var(--rb-blue);
+}
+
+.btn-warning {
+  --bs-btn-bg: var(--rb-amber);
+  --bs-btn-border-color: var(--rb-amber);
+  --bs-btn-hover-bg: var(--rb-amber-dark);
+  --bs-btn-hover-border-color: var(--rb-amber-dark);
+  --bs-btn-color: #ffffff;
+  --bs-btn-hover-color: #ffffff;
+}
+
+.text-primary {
+  color: var(--rb-blue) !important;
+}
+
+.bg-primary {
+  background-color: var(--rb-navy) !important;
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.55rem 1.2rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+}
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border-color: #d7e0ea;
+  padding: 0.6rem 0.85rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--rb-blue);
+  box-shadow: 0 0 0 0.2rem rgba(21, 101, 216, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.card {
+  border: 1px solid var(--rb-border);
+  border-radius: var(--rb-radius);
+  box-shadow: var(--rb-shadow);
+}
+
+.card-header {
+  border-radius: var(--rb-radius) var(--rb-radius) 0 0 !important;
+  font-weight: 600;
+}
+
+.alert {
+  border-radius: 12px;
+  border: none;
+}
+
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* --------------------------------------------------
+   PAGE HEADER (used on inner pages)
+-------------------------------------------------- */
+
+.page-header {
+  background: linear-gradient(
+    120deg,
+    var(--rb-navy) 0%,
+    #10457f 55%,
+    var(--rb-blue) 100%
+  );
+  color: #ffffff;
+  padding: 42px 0 70px;
+  margin-bottom: -40px;
+}
+
+.page-header h1,
+.page-header h2 {
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.page-header p {
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 0;
+}
+
+.page-body {
+  position: relative;
+  z-index: 2;
+}
+
+/* --------------------------------------------------
+   NAVBAR
+-------------------------------------------------- */
+
+.rb-navbar {
+  background: linear-gradient(
+    100deg,
+    var(--rb-navy-dark) 0%,
+    var(--rb-navy) 55%,
+    #12508f 100%
+  );
+  box-shadow: 0 4px 18px rgba(7, 29, 56, 0.25);
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.rb-navbar .navbar-brand {
+  font-size: 1.35rem;
+  letter-spacing: 0.4px;
+  color: #ffffff;
+}
+
+.rb-navbar .navbar-brand span.brand-accent {
+  color: var(--rb-amber);
+}
+
+.rb-navbar .nav-link {
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem !important;
+  transition: background-color 0.2s ease;
+}
+
+.rb-navbar .nav-link:hover,
+.rb-navbar .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.welcome-chip {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 40px;
+  padding: 6px 16px;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.welcome-chip .chip-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--rb-amber);
+  color: #1f2937;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-right: 8px;
+}
+
+/* LOGIN / REGISTER DROPDOWN */
+
+.login-dropdown {
+  position: relative;
+}
+
+.login-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 225px;
+  background-color: #ffffff;
+  border: 1px solid var(--rb-border);
+  border-radius: 12px;
+  box-shadow: var(--rb-shadow-lg);
+  padding: 8px 0;
+  z-index: 1000;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.login-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 18px;
+  color: var(--rb-text);
+  background-color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.login-menu-item:hover {
+  background-color: var(--rb-blue-light);
+  color: var(--rb-blue);
+}
+
+.login-divider {
+  height: 1px;
+  background-color: var(--rb-border);
+  margin: 6px 0;
+}
+
+.register-item {
+  font-weight: 600;
+  color: var(--rb-blue);
+}
+
+/* --------------------------------------------------
+   HOME HERO
+-------------------------------------------------- */
+
+.home-hero {
+  position: relative;
+  min-height: 640px;
+  background-image: url("/images/hero-train.svg");
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(4, 18, 33, 0.88) 0%,
+    rgba(4, 18, 33, 0.72) 55%,
+    rgba(4, 18, 33, 0.5) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 60px 0;
+}
+
+.hero-tagline {
+  color: #ffffff;
+}
+
+.hero-tagline .hero-badge {
+  display: inline-block;
+  background-color: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fcd34d;
+  border-radius: 40px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.hero-tagline h1 {
+  color: #ffffff;
+  font-size: 2.8rem;
+  line-height: 1.2;
+  font-weight: 800;
+  margin-bottom: 14px;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.hero-tagline h1 .accent {
+  color: var(--rb-amber);
+}
+
+.hero-tagline p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.05rem;
+  max-width: 520px;
+}
+
+.hero-points {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+
+.hero-points li {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-points li svg {
+  color: var(--rb-amber);
+}
+
+/* BOOKING BOX */
+
+.booking-box {
+  background: rgba(255, 255, 255, 0.98);
+  padding: 26px;
+  border-radius: 20px;
+  box-shadow: 0 22px 55px rgba(3, 15, 30, 0.45);
+  position: relative;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+
+.booking-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.booking-title span {
+  font-size: 30px;
+}
+
+.booking-title h2 {
+  margin: 0;
+  color: var(--rb-navy);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.booking-tabs {
+  display: flex;
+  background-color: #eef3f9;
+  border-radius: 12px;
+  padding: 5px;
+  gap: 5px;
+}
+
+.booking-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 8px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #5b6b7f;
+  border-radius: 9px;
+  transition: all 0.2s ease;
+}
+
+.booking-tab:hover {
+  color: var(--rb-blue);
+}
+
+.booking-tab.active {
+  color: #ffffff;
+  background: linear-gradient(120deg, var(--rb-blue), #0f51b0);
+  box-shadow: 0 6px 14px rgba(21, 101, 216, 0.3);
+}
+
+.booking-box .search-card {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent;
+}
+
+.booking-box .search-card h3 {
+  display: none;
+}
+
+/* --------------------------------------------------
+   SEARCH SUGGESTIONS
+-------------------------------------------------- */
+
+.suggestion-box {
+  position: absolute;
+  top: 100%;
+  left: 12px;
+  right: 12px;
+  background: #ffffff;
+  border: 1px solid var(--rb-border);
+  border-radius: 12px;
+  box-shadow: var(--rb-shadow-lg);
+  z-index: 1000;
+  overflow: hidden;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.suggestion-item:hover {
+  background-color: var(--rb-blue-light);
+  color: var(--rb-blue);
+}
+
+/* --------------------------------------------------
+   EXPLORE SECTION
+-------------------------------------------------- */
+
+.explore-section {
+  background-color: #ffffff;
+  padding: 55px 0;
+}
+
+.section-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--rb-navy);
+  margin-bottom: 6px;
+}
+
+.section-subtitle {
+  color: var(--rb-muted);
+  margin-bottom: 28px;
+}
+
+.explore-card {
+  background-color: #ffffff;
+  border: 1px solid var(--rb-border);
+  border-radius: 14px;
+  min-height: 128px;
+  height: 100%;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.explore-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(11, 44, 83, 0.14);
+  border-color: var(--rb-blue);
+}
+
+.explore-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background-color: var(--rb-blue-light);
+  color: var(--rb-blue);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.explore-card:hover .explore-icon {
+  background-color: var(--rb-blue);
+  color: #ffffff;
+}
+
+.explore-card h6 {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #334155;
+  margin: 0;
+}
+
+/* --------------------------------------------------
+   FEATURE / STAT STRIP
+-------------------------------------------------- */
+
+.feature-strip {
+  background: linear-gradient(120deg, #0b2c53, #12508f);
+  padding: 45px 0;
+  color: #ffffff;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 10px;
+}
+
+.feature-item .feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--rb-amber);
+  font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.feature-item h5 {
+  color: #ffffff;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+.feature-item p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* --------------------------------------------------
+   TRAIN RESULT CARD
+-------------------------------------------------- */
+
+.train-card {
+  border-radius: var(--rb-radius);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.train-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--rb-shadow-lg);
+}
+
+.train-card .train-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--rb-navy);
+  margin-bottom: 2px;
+}
+
+.train-number-chip {
+  display: inline-block;
+  background-color: var(--rb-blue-light);
+  color: var(--rb-blue);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.route-time {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--rb-navy);
+}
+
+.route-place {
+  font-size: 0.85rem;
+  color: var(--rb-muted);
+}
+
+.route-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #b7c4d4;
+}
+
+.route-line .line {
+  flex: 1;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #cbd5e1 0 6px,
+    transparent 6px 12px
+  );
+}
+
+.fare-amount {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--rb-navy);
+}
+
+/* --------------------------------------------------
+   AUTH PAGES
+-------------------------------------------------- */
+
+.auth-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #f4f7fb 0%, #e6eefb 100%);
+  padding: 50px 0;
+}
+
+.auth-card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: var(--rb-shadow-lg);
+  overflow: hidden;
+}
+
+.auth-card .auth-head {
+  background: linear-gradient(120deg, var(--rb-navy), #12508f);
+  color: #ffffff;
+  padding: 28px 30px;
+  text-align: center;
+}
+
+.auth-card .auth-head h2 {
+  color: #ffffff;
+  margin-bottom: 4px;
+  font-size: 1.5rem;
+}
+
+.auth-card .auth-head p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+}
+
+.auth-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--rb-amber);
+  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* --------------------------------------------------
+   ADMIN DASHBOARD
+-------------------------------------------------- */
+
+.stat-card {
+  border-radius: var(--rb-radius);
+  border: 1px solid var(--rb-border);
+  background: #ffffff;
+  padding: 22px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--rb-shadow-lg);
+}
+
+.stat-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--rb-navy);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--rb-muted);
+  margin: 0;
+}
+
+.admin-action-card {
+  border-radius: var(--rb-radius);
+  overflow: hidden;
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--rb-shadow-lg);
+}
+
+.admin-action-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+
+/* --------------------------------------------------
+   TICKET CARD (bookings)
+-------------------------------------------------- */
+
+.ticket-card {
+  border-radius: var(--rb-radius);
+  overflow: hidden;
+  border: 1px solid var(--rb-border);
+}
+
+.ticket-head {
+  background: linear-gradient(120deg, var(--rb-navy), #12508f);
+  color: #ffffff;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pnr-chip {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.passenger-row {
+  background-color: #f7fafd;
+  border: 1px solid var(--rb-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.info-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--rb-muted);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.info-value {
+  font-weight: 600;
+  color: var(--rb-text);
+  margin: 0;
+}
+
+/* --------------------------------------------------
+   TRAIN LIST (admin manage bookings)
+-------------------------------------------------- */
+
+.train-row-card {
+  border-radius: 14px;
+  border: 1px solid var(--rb-border);
+  background: #ffffff;
+  padding: 18px 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  height: 100%;
+}
+
+.train-row-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--rb-blue);
+  box-shadow: var(--rb-shadow-lg);
+}
+
+.train-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--rb-blue), #0b2c53);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------
+   FOOTER
+-------------------------------------------------- */
+
+.rb-footer {
+  background: linear-gradient(
+    100deg,
+    var(--rb-navy-dark) 0%,
+    var(--rb-navy) 100%
+  );
+  color: rgba(255, 255, 255, 0.75);
+  padding: 45px 0 0;
+  margin-top: 60px;
+}
+
+.rb-footer h5,
+.rb-footer h6 {
+  color: #ffffff;
+}
+
+.rb-footer a {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  display: inline-block;
+  padding: 3px 0;
+}
+
+.rb-footer a:hover {
+  color: var(--rb-amber);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 30px;
+  padding: 16px 0;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* --------------------------------------------------
+   RESPONSIVE
+-------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+  .home-hero {
+    min-height: auto;
+    background-position: center;
+    padding: 30px 0;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(4, 18, 33, 0.88) 0%,
+      rgba(4, 18, 33, 0.78) 100%
+    );
+  }
+
+  .hero-tagline {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .hero-tagline h1 {
+    font-size: 2.1rem;
+  }
+
+  .hero-tagline p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-points {
+    justify-content: center;
+  }
+
+  .booking-box {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .rb-navbar .navbar-nav {
+    padding-top: 10px;
+  }
+
+  .welcome-chip {
+    display: inline-flex;
+    align-items: center;
+    margin: 10px 0;
+  }
+
+  .login-menu {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+    margin-top: 8px;
+  }
+
+  .page-header {
+    padding: 32px 0 60px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero-content {
+    padding: 30px 0;
+  }
+
+  .hero-tagline h1 {
+    font-size: 1.75rem;
+  }
+
+  .booking-box {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .booking-title h2 {
+    font-size: 1.25rem;
+  }
+
+  .booking-tab {
+    font-size: 0.82rem;
+    padding: 9px 4px;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .ticket-head {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-tagline h1 {
+    font-size: 1.5rem;
+  }
+
+  .hero-points li {
+    font-size: 0.82rem;
+  }
+
+  .explore-card {
+    min-height: 112px;
+  }
+
+  .explore-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.05rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}

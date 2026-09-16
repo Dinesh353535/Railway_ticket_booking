@@ -1,0 +1,160 @@
+{
+  "trains": [
+    {
+      "id": 1,
+      "trainNumber": "12727",
+      "trainName": "Godavari Express",
+      "source": "Vijayawada",
+      "destination": "Hyderabad",
+      "date": "2026-09-15",
+      "departure": "06:00 AM",
+      "arrival": "01:00 PM",
+      "seats": 45,
+      "fare": 650,
+      "classes": {
+        "1A": {
+          "seats": 10,
+          "fare": 1200
+        },
+        "2A": {
+          "seats": 20,
+          "fare": 900
+        },
+        "SL": {
+          "seats": 45,
+          "fare": 650
+        }
+      }
+    },
+    {
+      "id": 2,
+      "trainNumber": "12759",
+      "trainName": "Charminar Express",
+      "source": "Hyderabad",
+      "destination": "Chennai",
+      "date": "2026-09-15",
+      "departure": "06:30 PM",
+      "arrival": "07:30 AM",
+      "seats": 30,
+      "fare": 800,
+      "classes": {
+        "1A": {
+          "seats": 8,
+          "fare": 1400
+        },
+        "2A": {
+          "seats": 15,
+          "fare": 1050
+        },
+        "SL": {
+          "seats": 30,
+          "fare": 800
+        }
+      }
+    },
+    {
+      "id": 3,
+      "trainNumber": "12805",
+      "trainName": "Janmabhoomi Express",
+      "source": "Visakhapatnam",
+      "destination": "Secunderabad",
+      "date": "2026-09-16",
+      "departure": "07:00 AM",
+      "arrival": "06:00 PM",
+      "seats": 55,
+      "fare": 720,
+      "classes": {
+        "1A": {
+          "seats": 12,
+          "fare": 1300
+        },
+        "2A": {
+          "seats": 25,
+          "fare": 950
+        },
+        "SL": {
+          "seats": 55,
+          "fare": 720
+        }
+      }
+    },
+    {
+      "id": 4,
+      "trainNumber": "12706",
+      "trainName": "Intercity Express",
+      "source": "Hyderabad",
+      "destination": "Vijayawada",
+      "date": "2026-09-16",
+      "departure": "08:00 AM",
+      "arrival": "02:00 PM",
+      "seats": 40,
+      "fare": 600,
+      "classes": {
+        "1A": {
+          "seats": 8,
+          "fare": 1100
+        },
+        "2A": {
+          "seats": 18,
+          "fare": 850
+        },
+        "SL": {
+          "seats": 40,
+          "fare": 600
+        }
+      }
+    },
+    {
+      "id": 5,
+      "trainNumber": "12740",
+      "trainName": "Garib Rath Express",
+      "source": "Secunderabad",
+      "destination": "Visakhapatnam",
+      "date": "2026-09-17",
+      "departure": "05:30 PM",
+      "arrival": "06:30 AM",
+      "seats": 25,
+      "fare": 550,
+      "classes": {
+        "1A": {
+          "seats": 5,
+          "fare": 1000
+        },
+        "2A": {
+          "seats": 12,
+          "fare": 750
+        },
+        "SL": {
+          "seats": 25,
+          "fare": 550
+        }
+      }
+    },
+    {
+      "id": 6,
+      "trainNumber": "12710",
+      "trainName": "Simhapuri Express",
+      "source": "Vijayawada",
+      "destination": "Secunderabad",
+      "date": "2026-09-17",
+      "departure": "09:00 PM",
+      "arrival": "06:00 AM",
+      "seats": 35,
+      "fare": 680,
+      "classes": {
+        "1A": {
+          "seats": 7,
+          "fare": 1150
+        },
+        "2A": {
+          "seats": 15,
+          "fare": 850
+        },
+        "SL": {
+          "seats": 35,
+          "fare": 680
+        }
+      }
+    }
+  ]
+}
