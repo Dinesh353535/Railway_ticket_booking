@@ -91,7 +91,7 @@ git clone <your-github-repository-url>
 ### 2. Navigate to the Project Folder
 
 ```bash
-cd Railway-main
+cd Railway_ticket_booking
 ```
 
 ### 3. Install Dependencies
