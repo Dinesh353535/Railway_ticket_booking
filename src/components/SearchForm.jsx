@@ -5,7 +5,6 @@ import {
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaSearch,
-  FaExchangeAlt,
 } from "react-icons/fa";
 
 import { loadTrains } from "../utils/helpers";
@@ -31,7 +30,10 @@ function SearchForm() {
 
   const navigate = useNavigate();
 
-  /* Build the station list from the train data */
+  /* =====================================================
+     LOAD STATIONS
+     ===================================================== */
+
   useEffect(() => {
     const loadLocations = async () => {
       const trains = await loadTrains();
@@ -47,9 +49,19 @@ function SearchForm() {
     loadLocations();
   }, []);
 
+  /* =====================================================
+     SOURCE SUGGESTIONS
+     ===================================================== */
+
   const sourceSuggestions = locations.filter((location) =>
-    location.toLowerCase().includes(source.toLowerCase())
+    location
+      .toLowerCase()
+      .includes(source.toLowerCase())
   );
+
+  /* =====================================================
+     DESTINATION SUGGESTIONS
+     ===================================================== */
 
   const destinationSuggestions = locations.filter(
     (location) =>
@@ -58,11 +70,9 @@ function SearchForm() {
         .includes(destination.toLowerCase())
   );
 
-  const handleSwap = () => {
-    setSource(destination);
-    setDestination(source);
-    setError("");
-  };
+  /* =====================================================
+     SEARCH
+     ===================================================== */
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -96,25 +106,48 @@ function SearchForm() {
   return (
     <div className="card shadow p-4 search-card">
 
-      <h3 className="text-center mb-4">Search Trains</h3>
+      {/* =================================================
+          TITLE
+          ================================================= */}
+
+      <h3 className="text-center mb-4">
+        Search Trains
+      </h3>
+
+      {/* =================================================
+          ERROR MESSAGE
+          ================================================= */}
 
       {error && (
         <div className="alert alert-danger py-2">
+
           <strong>⚠ </strong>
+
           {error}
+
         </div>
       )}
+
+      {/* =================================================
+          SEARCH FORM
+          ================================================= */}
 
       <form onSubmit={handleSubmit}>
 
         <div className="row g-3">
 
-          {/* FROM */}
-          <div className="col-12 col-md-5 position-relative">
+          {/* =================================================
+              FROM
+              ================================================= */}
+
+          <div className="col-12 col-md-6 position-relative">
 
             <label className="form-label d-flex align-items-center gap-2">
+
               <FaMapMarkerAlt className="text-primary" />
+
               From
+
             </label>
 
             <input
@@ -132,56 +165,61 @@ function SearchForm() {
               }
               onBlur={() => {
                 setTimeout(
-                  () => setShowSourceSuggestions(false),
+                  () =>
+                    setShowSourceSuggestions(false),
                   150
                 );
               }}
             />
 
+            {/* Source Suggestions */}
+
             {showSourceSuggestions &&
               source.trim() !== "" &&
               sourceSuggestions.length > 0 && (
+
                 <div className="suggestion-box">
+
                   {sourceSuggestions.map(
                     (location, index) => (
+
                       <button
                         type="button"
                         className="suggestion-item"
                         key={index}
                         onMouseDown={() => {
                           setSource(location);
-                          setShowSourceSuggestions(false);
+                          setShowSourceSuggestions(
+                            false
+                          );
                         }}
                       >
+
                         📍 {location}
+
                       </button>
+
                     )
                   )}
+
                 </div>
+
               )}
 
           </div>
 
-          {/* SWAP */}
-          <div className="col-12 col-md-2 d-flex align-items-end justify-content-center">
+          {/* =================================================
+              TO
+              ================================================= */}
 
-            <button
-              type="button"
-              className="btn btn-outline-primary w-100"
-              onClick={handleSwap}
-              title="Swap stations"
-            >
-              <FaExchangeAlt />
-            </button>
-
-          </div>
-
-          {/* TO */}
-          <div className="col-12 col-md-5 position-relative">
+          <div className="col-12 col-md-6 position-relative">
 
             <label className="form-label d-flex align-items-center gap-2">
+
               <FaMapMarkerAlt className="text-primary" />
+
               To
+
             </label>
 
             <input
@@ -206,12 +244,17 @@ function SearchForm() {
               }}
             />
 
+            {/* Destination Suggestions */}
+
             {showDestinationSuggestions &&
               destination.trim() !== "" &&
               destinationSuggestions.length > 0 && (
+
                 <div className="suggestion-box">
+
                   {destinationSuggestions.map(
                     (location, index) => (
+
                       <button
                         type="button"
                         className="suggestion-item"
@@ -223,21 +266,32 @@ function SearchForm() {
                           );
                         }}
                       >
+
                         📍 {location}
+
                       </button>
+
                     )
                   )}
+
                 </div>
+
               )}
 
           </div>
 
-          {/* DATE */}
+          {/* =================================================
+              JOURNEY DATE
+              ================================================= */}
+
           <div className="col-12">
 
             <label className="form-label d-flex align-items-center gap-2">
+
               <FaCalendarAlt className="text-primary" />
+
               Journey Date
+
             </label>
 
             <input
@@ -252,14 +306,21 @@ function SearchForm() {
 
           </div>
 
-          {/* SUBMIT */}
+          {/* =================================================
+              SEARCH BUTTON
+              ================================================= */}
+
           <div className="col-12">
 
             <button
               type="submit"
               className="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
             >
-              <FaSearch /> Search Trains
+
+              <FaSearch />
+
+              Search Trains
+
             </button>
 
           </div>

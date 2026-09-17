@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Link,
   useNavigate,
@@ -32,6 +32,30 @@ function Navbar() {
   const loggedInPassenger = getLoggedInPassenger();
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  /* Close dropdown when clicking outside */
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+  }, []);
 
   const showHome =
     location.pathname === "/admin-login" ||
@@ -54,18 +78,28 @@ function Navbar() {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark rb-navbar sticky-top">
+
       <div className="container">
 
-        {/* Logo */}
+        {/* =====================================================
+            LOGO
+        ===================================================== */}
+
         <Link
-          className="navbar-brand fw-bold d-flex align-items-center gap-2"
+          className="navbar-brand fw-bold d-flex align-items-center"
           to="/"
         >
-          <FaTrain />
-          Rail<span className="brand-accent">Book</span>
+          <FaTrain className="me-2" />
+
+          <span>
+            Rail<span className="brand-accent">Book</span>
+          </span>
         </Link>
 
-        {/* Mobile Toggle */}
+        {/* =====================================================
+            MOBILE TOGGLE
+        ===================================================== */}
+
         <button
           className="navbar-toggler border-0"
           type="button"
@@ -83,22 +117,31 @@ function Navbar() {
           id="navbarNav"
         >
 
-          {/* ========== PASSENGER LOGGED IN ========== */}
+          {/* ===================================================
+              PASSENGER LOGGED IN
+          =================================================== */}
 
           {isPassenger && !isAdmin ? (
+
             <>
               <div className="mx-lg-auto">
+
                 <span className="welcome-chip d-inline-flex align-items-center">
+
                   <span className="chip-avatar">
                     {firstLetter}
                   </span>
+
                   Welcome, {loggedInPassenger?.name}
+
                 </span>
+
               </div>
 
               <ul className="navbar-nav align-items-lg-center gap-lg-1">
 
                 <li className="nav-item">
+
                   <Link
                     className={`nav-link text-white fw-semibold d-flex align-items-center gap-2 ${
                       location.pathname === "/"
@@ -107,11 +150,14 @@ function Navbar() {
                     }`}
                     to="/"
                   >
-                    <FaHome /> Home
+                    <FaHome />
+                    Home
                   </Link>
+
                 </li>
 
                 <li className="nav-item">
+
                   <Link
                     className={`nav-link text-white fw-semibold d-flex align-items-center gap-2 ${
                       location.pathname === "/my-bookings"
@@ -120,77 +166,106 @@ function Navbar() {
                     }`}
                     to="/my-bookings"
                   >
-                    <FaClipboardList /> My Bookings
+                    <FaClipboardList />
+                    My Bookings
                   </Link>
+
                 </li>
 
                 <li className="nav-item ms-lg-2 mt-2 mt-lg-0">
+
                   <button
                     className="btn btn-danger btn-sm d-flex align-items-center gap-2"
                     onClick={handlePassengerLogout}
                   >
-                    <FaSignOutAlt /> Logout
+                    <FaSignOutAlt />
+                    Logout
                   </button>
+
                 </li>
 
               </ul>
             </>
+
           ) : isAdmin ? (
 
-            /* ========== ADMIN LOGGED IN ========== */
+            /* =================================================
+               ADMIN LOGGED IN
+            ================================================= */
 
             <>
+
               <div className="mx-lg-auto">
+
                 <span className="welcome-chip d-inline-flex align-items-center">
+
                   <FaUserShield className="me-2" />
+
                   Administrator
+
                 </span>
+
               </div>
 
               <ul className="navbar-nav align-items-lg-center gap-lg-1">
 
                 <li className="nav-item">
+
                   <Link
                     className="nav-link text-white fw-semibold d-flex align-items-center gap-2"
                     to="/admin-dashboard"
                   >
-                    <FaHome /> Dashboard
+                    <FaHome />
+                    Dashboard
                   </Link>
+
                 </li>
 
                 <li className="nav-item ms-lg-2 mt-2 mt-lg-0">
+
                   <button
                     className="btn btn-danger btn-sm d-flex align-items-center gap-2"
                     onClick={handleAdminLogout}
                   >
-                    <FaSignOutAlt /> Logout
+                    <FaSignOutAlt />
+                    Logout
                   </button>
+
                 </li>
 
               </ul>
+
             </>
+
           ) : (
 
-            /* ========== NOT LOGGED IN ========== */
+            /* =================================================
+               NOT LOGGED IN
+            ================================================= */
 
             <ul className="navbar-nav ms-auto align-items-lg-center">
 
               {showHome && (
+
                 <li className="nav-item me-lg-3">
+
                   <Link
                     className="nav-link text-white fw-semibold d-flex align-items-center gap-2"
                     to="/"
                   >
-                    <FaHome /> Home
+                    <FaHome />
+                    Home
                   </Link>
+
                 </li>
+
               )}
 
               <li
                 className="nav-item login-dropdown"
-                onMouseEnter={() => setShowDropdown(true)}
-                onMouseLeave={() => setShowDropdown(false)}
+                ref={dropdownRef}
               >
+
                 <button
                   type="button"
                   className="btn btn-light text-primary fw-semibold d-flex align-items-center gap-2"
@@ -198,12 +273,17 @@ function Navbar() {
                     setShowDropdown(!showDropdown)
                   }
                 >
+
                   <FaUserCircle />
+
                   LOGIN / REGISTER
+
                   <FaChevronDown size={11} />
+
                 </button>
 
                 {showDropdown && (
+
                   <div className="login-menu">
 
                     <Link
@@ -239,14 +319,19 @@ function Navbar() {
                     </Link>
 
                   </div>
+
                 )}
+
               </li>
 
             </ul>
+
           )}
 
         </div>
+
       </div>
+
     </nav>
   );
 }

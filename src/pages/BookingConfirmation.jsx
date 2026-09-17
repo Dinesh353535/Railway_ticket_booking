@@ -6,7 +6,8 @@ import {
   FaTrain,
   FaClipboardList,
   FaHome,
-  FaPrint,
+  FaCopy,
+  FaCheck,
 } from "react-icons/fa";
 
 import {
@@ -22,6 +23,8 @@ import {
 
 function BookingConfirmation() {
   const [booking, setBooking] = useState(null);
+  const [copied, setCopied] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,30 +47,71 @@ function BookingConfirmation() {
     }
   }, [navigate]);
 
+  // =====================================================
+  // COPY PNR
+  // =====================================================
+
+  const handleCopyPNR = async () => {
+    if (!booking?.pnr) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        String(booking.pnr)
+      );
+
+      setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Unable to copy PNR:", error);
+    }
+  };
+
+  // =====================================================
+  // NO BOOKING
+  // =====================================================
+
   if (!booking) {
     return (
       <div className="container my-5">
+
         <div className="row justify-content-center">
+
           <div className="col-lg-6">
+
             <div className="card text-center p-4 p-md-5">
 
-              <div className="fs-1 mb-3">🎫</div>
+              <div className="fs-1 mb-3">
+                🎫
+              </div>
 
-              <h4>No Booking Found</h4>
+              <h4>
+                No Booking Found
+              </h4>
 
               <p className="text-muted">
                 We could not find your booking details.
               </p>
 
               <div>
-                <Link to="/" className="btn btn-primary">
+
+                <Link
+                  to="/"
+                  className="btn btn-primary"
+                >
                   Back to Home
                 </Link>
+
               </div>
 
             </div>
+
           </div>
+
         </div>
+
       </div>
     );
   }
@@ -81,15 +125,22 @@ function BookingConfirmation() {
     <div className="container my-5">
 
       <div className="row justify-content-center">
+
         <div className="col-lg-10">
 
-          {/* Success Banner */}
+          {/* =================================================
+              SUCCESS MESSAGE
+          ================================================= */}
+
           <div className="card text-center mb-4 border-0">
+
             <div className="card-body p-4 p-md-5">
 
               <div
                 className="text-success mb-3"
-                style={{ fontSize: "3rem" }}
+                style={{
+                  fontSize: "3rem",
+                }}
               >
                 <FaCheckCircle />
               </div>
@@ -98,32 +149,90 @@ function BookingConfirmation() {
                 Booking Confirmed!
               </h2>
 
-              <p className="text-muted mb-3">
+              <p className="text-muted mb-4">
                 Your train ticket has been booked
                 successfully. Save your PNR number for
                 future reference.
               </p>
 
-              <div className="d-inline-block bg-light border rounded-3 px-4 py-3">
-                <span className="info-label">
+              {/* =================================================
+                  PNR NUMBER + COPY BUTTON
+              ================================================= */}
+
+              <div className="d-inline-flex flex-column align-items-center">
+
+                <span className="info-label mb-2">
                   PNR Number
                 </span>
 
-                <h3 className="mb-0 text-primary">
-                  {booking.pnr}
-                </h3>
+                <div
+                  className="d-flex align-items-center gap-2"
+                  style={{
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+
+                  <div
+                    className="bg-light border rounded-3 px-4 py-2"
+                  >
+
+                    <h3 className="mb-0 text-primary">
+                      {booking.pnr}
+                    </h3>
+
+                  </div>
+
+                  {/* COPY BUTTON */}
+
+                  <button
+                    type="button"
+                    className={`btn ${
+                      copied
+                        ? "btn-success"
+                        : "btn-outline-primary"
+                    } d-flex align-items-center gap-2`}
+                    onClick={handleCopyPNR}
+                  >
+
+                    {copied ? (
+                      <>
+                        <FaCheck />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <FaCopy />
+                        Copy
+                      </>
+                    )}
+
+                  </button>
+
+                </div>
+
               </div>
 
             </div>
+
           </div>
 
-          {/* Ticket */}
+          {/* =================================================
+              TICKET CARD
+          ================================================= */}
+
           <div className="card ticket-card mb-4">
+
+            {/* Ticket Header */}
 
             <div className="ticket-head">
 
               <span className="d-flex align-items-center gap-2 fw-semibold">
-                <FaTrain /> E-Ticket
+
+                <FaTrain />
+
+                E-Ticket
+
               </span>
 
               <span className="pnr-chip">
@@ -132,7 +241,13 @@ function BookingConfirmation() {
 
             </div>
 
+            {/* Ticket Body */}
+
             <div className="card-body p-4">
+
+              {/* =================================================
+                  TRAIN DETAILS
+              ================================================= */}
 
               <div className="row g-4 align-items-center">
 
@@ -152,7 +267,10 @@ function BookingConfirmation() {
 
                   <div className="row g-3 text-center text-md-start">
 
+                    {/* Departure */}
+
                     <div className="col-4">
+
                       <p className="route-time mb-0">
                         {booking.departure}
                       </p>
@@ -160,17 +278,29 @@ function BookingConfirmation() {
                       <span className="route-place">
                         {booking.source}
                       </span>
+
                     </div>
+
+                    {/* Route */}
 
                     <div className="col-4 d-flex align-items-center">
+
                       <div className="route-line w-100">
+
                         <span className="line"></span>
+
                         <FaTrain />
+
                         <span className="line"></span>
+
                       </div>
+
                     </div>
 
+                    {/* Arrival */}
+
                     <div className="col-4">
+
                       <p className="route-time mb-0">
                         {booking.arrival}
                       </p>
@@ -178,6 +308,7 @@ function BookingConfirmation() {
                       <span className="route-place">
                         {booking.destination}
                       </span>
+
                     </div>
 
                   </div>
@@ -188,9 +319,14 @@ function BookingConfirmation() {
 
               <hr className="my-4" />
 
+              {/* =================================================
+                  JOURNEY INFORMATION
+              ================================================= */}
+
               <div className="row g-3">
 
                 <div className="col-6 col-md-3">
+
                   <span className="info-label">
                     Journey Date
                   </span>
@@ -198,9 +334,11 @@ function BookingConfirmation() {
                   <p className="info-value">
                     {formatDate(booking.date)}
                   </p>
+
                 </div>
 
                 <div className="col-6 col-md-3">
+
                   <span className="info-label">
                     Class
                   </span>
@@ -208,9 +346,11 @@ function BookingConfirmation() {
                   <p className="info-value">
                     {getClassName(booking.class)}
                   </p>
+
                 </div>
 
                 <div className="col-6 col-md-3">
+
                   <span className="info-label">
                     Seats Booked
                   </span>
@@ -218,23 +358,32 @@ function BookingConfirmation() {
                   <p className="info-value">
                     {booking.seats}
                   </p>
+
                 </div>
 
                 <div className="col-6 col-md-3">
+
                   <span className="info-label">
                     Status
                   </span>
 
                   <p className="info-value">
+
                     <span className="badge bg-success">
                       CONFIRMED
                     </span>
+
                   </p>
+
                 </div>
 
               </div>
 
               <hr className="my-4" />
+
+              {/* =================================================
+                  PASSENGER DETAILS
+              ================================================= */}
 
               <h5 className="mb-3">
                 Passenger Details
@@ -244,10 +393,12 @@ function BookingConfirmation() {
 
                 {booking.passengers?.map(
                   (passenger, index) => (
+
                     <div
                       className="col-md-6"
                       key={index}
                     >
+
                       <div className="passenger-row h-100">
 
                         <strong className="d-block mb-2">
@@ -256,7 +407,10 @@ function BookingConfirmation() {
 
                         <div className="row g-2">
 
+                          {/* Name */}
+
                           <div className="col-5">
+
                             <span className="info-label">
                               Name
                             </span>
@@ -264,9 +418,13 @@ function BookingConfirmation() {
                             <p className="info-value">
                               {passenger.name}
                             </p>
+
                           </div>
 
+                          {/* Age */}
+
                           <div className="col-3">
+
                             <span className="info-label">
                               Age
                             </span>
@@ -274,9 +432,13 @@ function BookingConfirmation() {
                             <p className="info-value">
                               {passenger.age}
                             </p>
+
                           </div>
 
+                          {/* Gender */}
+
                           <div className="col-4">
+
                             <span className="info-label">
                               Gender
                             </span>
@@ -284,34 +446,62 @@ function BookingConfirmation() {
                             <p className="info-value">
                               {passenger.gender}
                             </p>
+
                           </div>
 
                         </div>
 
                       </div>
+
                     </div>
+
                   )
                 )}
 
               </div>
 
+              {/* =================================================
+                  FARE DETAILS
+              ================================================= */}
+
               <div className="alert alert-success mt-4 mb-0">
 
                 <div className="d-flex justify-content-between">
-                  <span>Fare per Seat</span>
-                  <strong>₹{farePerSeat}</strong>
+
+                  <span>
+                    Fare per Seat
+                  </span>
+
+                  <strong>
+                    ₹{farePerSeat}
+                  </strong>
+
                 </div>
 
                 <div className="d-flex justify-content-between mt-2">
-                  <span>Number of Seats</span>
-                  <strong>{booking.seats}</strong>
+
+                  <span>
+                    Number of Seats
+                  </span>
+
+                  <strong>
+                    {booking.seats}
+                  </strong>
+
                 </div>
 
                 <hr />
 
                 <div className="d-flex justify-content-between fs-5">
-                  <strong>Total Fare</strong>
-                  <strong>₹{booking.totalFare}</strong>
+
+                  <strong>
+                    Total Fare
+                  </strong>
+
+                  <strong>
+                    ₹{booking.totalFare}
+                  </strong>
+
                 </div>
 
               </div>
@@ -320,33 +510,43 @@ function BookingConfirmation() {
 
           </div>
 
-          {/* Buttons */}
+          {/* =================================================
+              ACTION BUTTONS
+              PRINT TICKET REMOVED
+          ================================================= */}
+
           <div className="d-flex flex-wrap justify-content-center gap-2">
+
+            {/* MY BOOKINGS */}
 
             <Link
               to="/my-bookings"
               className="btn btn-primary d-flex align-items-center gap-2"
             >
-              <FaClipboardList /> View My Bookings
+
+              <FaClipboardList />
+
+              View My Bookings
+
             </Link>
 
-            <button
-              className="btn btn-outline-primary d-flex align-items-center gap-2"
-              onClick={() => window.print()}
-            >
-              <FaPrint /> Print Ticket
-            </button>
+            {/* HOME */}
 
             <Link
               to="/"
               className="btn btn-secondary d-flex align-items-center gap-2"
             >
-              <FaHome /> Back to Home
+
+              <FaHome />
+
+              Back to Home
+
             </Link>
 
           </div>
 
         </div>
+
       </div>
 
     </div>
