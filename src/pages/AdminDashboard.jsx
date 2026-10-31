@@ -1,336 +1,230 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-
 import {
-  FaTrain,
-  FaTicketAlt,
-  FaUsers,
-  FaRupeeSign,
-  FaArrowRight,
+  FaTrain, FaTicketAlt, FaUsers, FaRupeeSign, FaSyncAlt, FaArrowRight,
 } from "react-icons/fa";
-import {
-  loadTrains,
-  getBookings,
-} from "../utils/helpers";
+import { loadAdminTrains, loadAdminBookings } from "../utils/helpers";
 
-function AdminDashboard() {
-  const [stats, setStats] = useState({
-    trains: 0,
-    bookings: 0,
-    passengers: 0,
-    revenue: 0,
-  });
+const statusOf = (b) =>
+  String(b.status || b.bookingStatus || b.booking_status || "").trim().toUpperCase();
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      const trains = await loadTrains();
-      const bookings = getBookings();
+const rupees = (n) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  }).format(Number(n) || 0);
 
-      const passengers = bookings.reduce(
-        (total, booking) =>
-          total + (booking.passengers?.length || 0),
-        0
-      );
+export default function AdminDashboard() {
+  const [trains, setTrains] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-      const revenue = bookings.reduce(
-        (total, booking) =>
-          total + (Number(booking.totalFare) || 0),
-        0
-      );
+  const refreshDashboard = useCallback(async (manual = false) => {
+    if (manual) setRefreshing(true);
+    else setLoading(true);
+    setError("");
 
-      setStats({
-        trains: trains.length,
-        bookings: bookings.length,
-        passengers,
-        revenue,
-      });
-    };
-
-    loadDashboard();
+    try {
+      // Admin endpoints read current records from MySQL, including inactive trains.
+      const [trainRows, bookingRows] = await Promise.all([
+        loadAdminTrains(),
+        loadAdminBookings(),
+      ]);
+      setTrains(Array.isArray(trainRows) ? trainRows : []);
+      setBookings(Array.isArray(bookingRows) ? bookingRows : []);
+    } catch (err) {
+      console.error("Admin dashboard refresh failed:", err);
+      setError(err.message || "Unable to load dashboard data from the database.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  const statsData = [
+  useEffect(() => {
+    refreshDashboard();
+  }, [refreshDashboard]);
+
+  const stats = useMemo(() => {
+    const confirmed = bookings.filter((b) => statusOf(b) === "CONFIRMED");
+    const cancelled = bookings.filter((b) => statusOf(b) === "CANCELLED");
+    const passengerCount = (b) =>
+      Number(b.passengerCount ?? b.passengers?.length ?? b.seats ?? 0);
+    const fare = (b) => Number(b.totalFare || 0);
+
+    const activeTrains = trains.filter((t) =>
+      t.isActive === true || t.isActive === 1 ||
+      String(t.isActive).toLowerCase() === "true" ||
+      String(t.isActive) === "1"
+    );
+    const inactiveTrains = trains.filter((t) => !(
+      t.isActive === true || t.isActive === 1 ||
+      String(t.isActive).toLowerCase() === "true" ||
+      String(t.isActive) === "1"
+    ));
+
+    const confirmedPassengers = confirmed.reduce((sum, b) => sum + passengerCount(b), 0);
+    const cancelledPassengers = cancelled.reduce((sum, b) => sum + passengerCount(b), 0);
+    const confirmedRevenue = confirmed.reduce((sum, b) => sum + fare(b), 0);
+    const cancelledRevenue = cancelled.reduce((sum, b) => sum + fare(b), 0);
+
+    return {
+      totalTrains: trains.length,
+      activeTrains: activeTrains.length,
+      inactiveTrains: inactiveTrains.length,
+      totalBookings: bookings.length,
+      confirmedBookings: confirmed.length,
+      cancelledBookings: cancelled.length,
+      confirmedPassengers,
+      cancelledPassengers,
+      totalPassengers: confirmedPassengers + cancelledPassengers,
+      confirmedRevenue,
+      cancelledRevenue,
+      totalRevenue: confirmedRevenue + cancelledRevenue,
+    };
+  }, [trains, bookings]);
+
+  const cards = [
     {
-      title: "Total Trains",
-      value: stats.trains,
-      icon: <FaTrain />,
-      iconClass: "bg-primary",
+      id: "trains", title: "Total Trains", value: stats.totalTrains,
+      icon: <FaTrain />, color: "#0d2b50",
+      split: [
+        ["Active Trains", stats.activeTrains, "confirmed"],
+        ["Inactive Trains", stats.inactiveTrains, "cancelled"],
+      ],
     },
     {
-      title: "Total Bookings",
-      value: stats.bookings,
-      icon: <FaTicketAlt />,
-      iconClass: "bg-success",
+      id: "bookings", title: "Total Bookings", value: stats.totalBookings,
+      icon: <FaTicketAlt />, color: "#198754",
+      split: [
+        ["Confirmed Bookings", stats.confirmedBookings, "confirmed"],
+        ["Cancelled Bookings", stats.cancelledBookings, "cancelled"],
+      ],
     },
     {
-      title: "Total Passengers",
-      value: stats.passengers,
-      icon: <FaUsers />,
-      iconClass: "bg-",
+      id: "passengers", title: "Total Passengers", value: stats.totalPassengers,
+      icon: <FaUsers />, color: "#dc3545",
+      split: [
+        ["Confirmed Passengers", stats.confirmedPassengers, "confirmed"],
+        ["Cancelled Passengers", stats.cancelledPassengers, "cancelled"],
+      ],
     },
     {
-      title: "Total Revenue",
-      value: `₹${stats.revenue}`,
-      icon: <FaRupeeSign />,
-      iconClass: "bg-warning text-dark",
+      id: "revenue", title: "Total Revenue", value: rupees(stats.totalRevenue),
+      icon: <FaRupeeSign />, color: "#ffb900",
+      split: [
+        ["Confirmed Fare", rupees(stats.confirmedRevenue), "confirmed"],
+        ["Cancelled Fare", rupees(stats.cancelledRevenue), "cancelled"],
+      ],
     },
   ];
 
   return (
     <>
-      {/* =====================================================
-          DASHBOARD HEADER
-      ===================================================== */}
-
       <div className="page-header">
         <div className="container">
-
-          <h2 className="fw-bold mb-2">
-            Admin Dashboard
-          </h2>
-
-          <p className="mb-0">
-            Manage trains, monitor bookings and track revenue
-          </p>
-
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <h2 className="mb-1">Admin Dashboard</h2>
+              <p className="mb-0">Manage trains, monitor bookings and track revenue</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-light d-inline-flex align-items-center gap-2"
+              onClick={() => refreshDashboard(true)}
+              disabled={loading || refreshing}
+            >
+              <FaSyncAlt className={refreshing ? "fa-spin" : ""} />
+              {refreshing ? "Refreshing..." : "Refresh Data"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* =====================================================
-          DASHBOARD CONTENT
-      ===================================================== */}
-
       <div className="container page-body pb-5">
-
-        {/* =================================================
-            STAT CARDS
-        ================================================= */}
-
-        <div className="row row-cols-2 row-cols-lg-4 g-3 mb-4">
-
-          {statsData.map((item, index) => (
-
-            <div
-              className="col"
-              key={index}
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            <strong>Dashboard data could not be loaded.</strong>
+            <div>{error}</div>
+            <button
+              type="button"
+              className="btn btn-outline-danger btn-sm mt-2"
+              onClick={() => refreshDashboard(true)}
+              disabled={refreshing}
             >
+              Try Again
+            </button>
+          </div>
+        )}
 
-              <div className="card h-100 border-0 shadow-sm rounded-4">
-
-                <div className="card-body p-3 p-sm-4">
-
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading dashboard...</span>
+            </div>
+            <p className="text-muted mt-2">Loading latest data from MySQL...</p>
+          </div>
+        ) : !error ? (
+          <>
+            <div className="row g-3 mb-4">
+              {cards.map((card) => (
+                <div className="col-12 col-sm-6 col-xl-3" key={card.id}>
                   <div
-                    className="
-                      d-flex
-                      flex-column
-                      flex-sm-row
-                      align-items-center
-                      justify-content-center
-                      justify-content-sm-start
-                      text-center
-                      text-sm-start
-                      gap-2
-                      gap-sm-3
-                    "
+                    className="stat-card dashboard-hover-card has-split h-100"
+                    tabIndex={0}
+                    aria-label={`${card.title}: hover or focus for breakdown`}
                   >
-
-                    {/* =================================================
-                        ICON
-                    ================================================= */}
-
-                    <div
-                      className={`
-                        ${item.iconClass}
-                        text-white
-                        rounded-3
-                        d-flex
-                        align-items-center
-                        justify-content-center
-                        flex-shrink-0
-                      `}
-                      style={{
-                        width: "52px",
-                        height: "52px",
-                      }}
-                    >
-                      {item.icon}
+                    <div className="stat-icon" style={{ backgroundColor: card.color }}>
+                      {card.icon}
                     </div>
-
-                    {/* =================================================
-                        NUMBER + LABEL
-                    ================================================= */}
-
-                    <div className="overflow-hidden">
-
-                      <div
-                        className="
-                          fw-bold
-                          fs-4
-                          lh-1
-                          text-nowrap
-                        "
-                      >
-                        {item.value}
-                      </div>
-
-                      <div
-                        className="
-                          small
-                          text-secondary
-                          mt-2
-                        "
-                      >
-                        {item.title}
-                      </div>
-
+                    <div className="dashboard-stat-content">
+                      <div className="stat-value">{card.value}</div>
+                      <p className="stat-label mb-0">{card.title}</p>
+                      <small className="text-muted dashboard-hint">{card.hint}</small>
                     </div>
-
+                    <div className="dashboard-breakdown">
+                      {card.split.map(([label, value, type]) => (
+                        <div className={`dashboard-breakdown-row ${type}`} key={label}>
+                          <span>{label}</span><strong>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-
                 </div>
-
-              </div>
-
+              ))}
             </div>
 
-          ))}
-
-        </div>
-
-        {/* =====================================================
-            ACTION CARDS
-        ===================================================== */}
-
-        <div className="row g-4">
-
-          {/* =================================================
-              MANAGE TRAINS
-          ================================================= */}
-
-          <div className="col-12 col-md-6">
-
-            <div className="card h-100 border-0 shadow-sm rounded-4">
-
-              <div className="card-body text-center p-4 p-lg-5">
-
-                <div
-                  className="
-                    bg-primary
-                    text-white
-                    rounded-4
-                    d-flex
-                    align-items-center
-                    justify-content-center
-                    mx-auto
-                    mb-4
-                  "
-                  style={{
-                    width: "68px",
-                    height: "68px",
-                  }}
-                >
-
-                  <FaTrain size={28} />
-
+            <div className="row g-4">
+              <div className="col-12 col-lg-6">
+                <div className="card h-100 border-0 shadow-sm">
+                  <div className="card-body text-center p-4 p-md-5">
+                    <div className="dashboard-action-icon train-action"><FaTrain /></div>
+                    <h4 className="fw-bold">Manage Trains</h4>
+                    <p className="text-muted">Add trains, update details, manage class-wise seats and fares, and deactivate trains.</p>
+                    <Link to="/admin/trains" className="btn btn-primary d-inline-flex align-items-center gap-2">
+                      Manage Trains <FaArrowRight />
+                    </Link>
+                  </div>
                 </div>
-
-                <h4 className="fw-bold mb-3">
-                  Manage Trains
-                </h4>
-
-                <p className="text-secondary mb-4">
-                  Add new trains, update train details,
-                  manage class-wise seats and fares, and
-                  remove trains from the system.
-                </p>
-
-                <Link
-                  to="/admin/trains"
-                  className="
-                    btn
-                    btn-primary
-                    d-inline-flex
-                    align-items-center
-                    justify-content-center
-                    gap-2
-                  "
-                >
-                  Manage Trains
-                  <FaArrowRight />
-                </Link>
-
               </div>
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              MANAGE BOOKINGS
-          ================================================= */}
-
-          <div className="col-12 col-md-6">
-
-            <div className="card h-100 border-0 shadow-sm rounded-4">
-
-              <div className="card-body text-center p-4 p-lg-5">
-
-                <div
-                  className="
-                    bg-success
-                    text-white
-                    rounded-4
-                    d-flex
-                    align-items-center
-                    justify-content-center
-                    mx-auto
-                    mb-4
-                  "
-                  style={{
-                    width: "68px",
-                    height: "68px",
-                  }}
-                >
-
-                  <FaTicketAlt size={28} />
-
+              <div className="col-12 col-lg-6">
+                <div className="card h-100 border-0 shadow-sm">
+                  <div className="card-body text-center p-4 p-md-5">
+                    <div className="dashboard-action-icon bookings-action"><FaTicketAlt /></div>
+                    <h4 className="fw-bold">Manage Bookings</h4>
+                    <p className="text-muted">View bookings and cancellation history using current database statuses.</p>
+                    <Link to="/admin/bookings" className="btn btn-success d-inline-flex align-items-center gap-2">
+                      View Train Bookings <FaArrowRight />
+                    </Link>
+                  </div>
                 </div>
-
-                <h4 className="fw-bold mb-3">
-                  Manage Bookings
-                </h4>
-
-                <p className="text-secondary mb-4">
-                  Select any train and view all bookings
-                  made for that train and manage tickets.
-                </p>
-
-                <Link
-                  to="/admin/bookings"
-                  className="
-                    btn
-                    btn-success
-                    d-inline-flex
-                    align-items-center
-                    justify-content-center
-                    gap-2
-                  "
-                >
-                  View Train Bookings
-                  <FaArrowRight />
-                </Link>
-
               </div>
-
             </div>
-
-          </div>
-
-        </div>
-
+          </>
+        ) : null}
       </div>
     </>
   );
 }
-
-export default AdminDashboard;

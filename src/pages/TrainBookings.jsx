@@ -1,880 +1,389 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import {
   FaTrain,
   FaArrowLeft,
-  FaTimesCircle,
   FaUserFriends,
   FaEnvelope,
   FaCopy,
   FaCheck,
+  FaSyncAlt,
 } from "react-icons/fa";
 
 import {
-  getBookings,
+  loadAdminBookings,
+  loadAdminTrains,
+  cancelAdminBooking,
   getClassName,
   formatDate,
+  formatCurrency,
+  getBookingStatus,
 } from "../utils/helpers";
-
-/*
-  Admin -> Manage Bookings -> View Bookings
-
-  Shows every user booking made for one particular
-  train, along with cancel options and PNR copy.
-*/
 
 function TrainBookings() {
   const { trainId } = useParams();
-
   const [bookings, setBookings] = useState([]);
   const [train, setTrain] = useState(null);
-
-  /* PNR currently copied */
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
   const [copiedPnr, setCopiedPnr] = useState(null);
 
-  /* =====================================================
-     LOAD BOOKINGS
-  ===================================================== */
+  const loadData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError("");
 
-  useEffect(() => {
-    const id = Number(trainId);
+    try {
+      const id = Number(trainId);
+      const [allBookings, allTrains] = await Promise.all([
+        loadAdminBookings(),
+        loadAdminTrains(),
+      ]);
 
-    const trainBookings = getBookings()
-      .filter((booking) => booking.trainId === id)
-      .sort((a, b) => b.id - a.id);
+      const matchingBookings = allBookings
+        .filter((booking) => Number(booking.trainId) === id)
+        .sort((a, b) => Number(b.id) - Number(a.id));
 
-    setBookings(trainBookings);
+      const foundTrain = allTrains.find((item) => Number(item.id) === id);
+      const sample = matchingBookings[0];
 
-    const savedTrains =
-      JSON.parse(localStorage.getItem("trains")) || [];
-
-    const foundTrain = savedTrains.find(
-      (item) => item.id === id
-    );
-
-    if (foundTrain) {
-      setTrain(foundTrain);
-    } else if (trainBookings.length > 0) {
-      /* Train was deleted, use booking data instead */
-
-      const sample = trainBookings[0];
-
-      setTrain({
-        id: sample.trainId,
-        trainName: sample.trainName,
-        trainNumber: sample.trainNumber,
-        source: sample.source,
-        destination: sample.destination,
-        date: sample.date,
-        removed: true,
-      });
+      setTrain(
+        foundTrain ||
+          (sample
+            ? {
+                id: Number(sample.trainId),
+                trainName: sample.trainName,
+                trainNumber: sample.trainNumber,
+                source: sample.source,
+                destination: sample.destination,
+                date: sample.date,
+                departure: sample.departure,
+                arrival: sample.arrival,
+                isActive: false,
+                removed: true,
+              }
+            : null)
+      );
+      setBookings(matchingBookings);
+    } catch (err) {
+      console.error("Unable to load train bookings from database:", err);
+      setError(err.message || "Unable to load bookings from the database.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   }, [trainId]);
 
-  /* =====================================================
-     COPY PNR
-  ===================================================== */
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const handleCopyPNR = async (pnr) => {
-    if (!pnr) {
+  const handleCancelBooking = async (booking) => {
+    const bookingId = booking.id ?? booking.bookingId;
+    const pnr = booking.pnr || `Booking #${bookingId}`;
+
+    if (getBookingStatus(booking) !== "CONFIRMED") {
+      window.alert("Only confirmed bookings can be cancelled.");
       return;
     }
+
+    const confirmed = window.confirm(
+      `Cancel ticket ${pnr}? This will update the MySQL database and the passenger will see the cancelled status.`
+    );
+    if (!confirmed) return;
 
     try {
+      await cancelAdminBooking(bookingId);
+      window.alert(`Ticket ${pnr} cancelled successfully.`);
+      await loadData(true);
+    } catch (err) {
+      console.error("Admin cancellation failed:", err);
+      window.alert(err.message || "Unable to cancel this booking.");
+      // Reload current state in case another user changed the status.
+      await loadData(true);
+    }
+  };
+
+  const handleCopyPNR = async (pnr) => {
+    if (!pnr) return;
+    try {
       await navigator.clipboard.writeText(String(pnr));
-
       setCopiedPnr(pnr);
-
-      setTimeout(() => {
-        setCopiedPnr(null);
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to copy PNR:", error);
-
-      /* Fallback */
-
-      try {
-        const textArea =
-          document.createElement("textarea");
-
-        textArea.value = String(pnr);
-
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-
-        document.body.appendChild(textArea);
-
-        textArea.focus();
-        textArea.select();
-
-        document.execCommand("copy");
-
-        document.body.removeChild(textArea);
-
-        setCopiedPnr(pnr);
-
-        setTimeout(() => {
-          setCopiedPnr(null);
-        }, 2000);
-      } catch (fallbackError) {
-        console.error(
-          "Fallback copy failed:",
-          fallbackError
-        );
-      }
+      window.setTimeout(() => setCopiedPnr(null), 1800);
+    } catch (err) {
+      console.error("Unable to copy PNR:", err);
+      window.prompt("Copy this PNR:", String(pnr));
     }
   };
 
-  /* =====================================================
-     RESTORE SEATS
-  ===================================================== */
-
-  const restoreClassSeats = (
-    id,
-    classCode,
-    numberOfSeats
-  ) => {
-    const savedTrains =
-      JSON.parse(localStorage.getItem("trains")) || [];
-
-    const updatedTrains = savedTrains.map((item) => {
-      if (
-        item.id === id &&
-        item.classes?.[classCode]
-      ) {
-        return {
-          ...item,
-
-          classes: {
-            ...item.classes,
-
-            [classCode]: {
-              ...item.classes[classCode],
-
-              seats:
-                item.classes[classCode].seats +
-                numberOfSeats,
-            },
-          },
-        };
-      }
-
-      return item;
-    });
-
-    localStorage.setItem(
-      "trains",
-      JSON.stringify(updatedTrains)
+  const summary = useMemo(() => {
+    const confirmed = bookings.filter(
+      (booking) => getBookingStatus(booking) === "CONFIRMED"
     );
-  };
-
-  /* =====================================================
-     CANCEL INDIVIDUAL PASSENGER
-  ===================================================== */
-
-  const cancelPassenger = (
-    bookingId,
-    passengerIndex
-  ) => {
-    const bookingToUpdate = bookings.find(
-      (booking) => booking.id === bookingId
+    const cancelled = bookings.filter(
+      (booking) => getBookingStatus(booking) === "CANCELLED"
     );
 
-    if (!bookingToUpdate) {
-      return;
-    }
-
-    const passenger =
-      bookingToUpdate.passengers?.[passengerIndex];
-
-    if (!passenger) {
-      return;
-    }
-
-    const confirmCancel = window.confirm(
-      `Are you sure you want to cancel the ticket for ${passenger.name}?`
-    );
-
-    if (!confirmCancel) {
-      return;
-    }
-
-    const farePerSeat =
-      bookingToUpdate.seats > 0
-        ? bookingToUpdate.totalFare /
-          bookingToUpdate.seats
-        : 0;
-
-    const updatedPassengers =
-      bookingToUpdate.passengers.filter(
-        (_, index) => index !== passengerIndex
-      );
-
-    const allBookings = getBookings();
-
-    /* =================================================
-       LAST PASSENGER CANCELLED
-    ================================================= */
-
-    if (updatedPassengers.length === 0) {
-      const updatedAllBookings = allBookings.filter(
-        (booking) => booking.id !== bookingId
-      );
-
-      localStorage.setItem(
-        "bookings",
-        JSON.stringify(updatedAllBookings)
-      );
-
-      setBookings(
-        bookings.filter(
-          (booking) => booking.id !== bookingId
-        )
-      );
-    } else {
-      /* =================================================
-         UPDATE BOOKING
-      ================================================= */
-
-      const updatedBooking = {
-        ...bookingToUpdate,
-
-        passengers: updatedPassengers,
-
-        seats: updatedPassengers.length,
-
-        totalFare:
-          farePerSeat * updatedPassengers.length,
-      };
-
-      const updatedAllBookings = allBookings.map(
-        (booking) =>
-          booking.id === bookingId
-            ? updatedBooking
-            : booking
-      );
-
-      localStorage.setItem(
-        "bookings",
-        JSON.stringify(updatedAllBookings)
-      );
-
-      setBookings(
-        bookings.map((booking) =>
-          booking.id === bookingId
-            ? updatedBooking
-            : booking
-        )
-      );
-    }
-
-    /* Restore one seat */
-
-    restoreClassSeats(
-      bookingToUpdate.trainId,
-      bookingToUpdate.class,
-      1
-    );
-
-    alert(
-      `${passenger.name}'s ticket cancelled successfully.`
-    );
-  };
-
-  /* =====================================================
-     CANCEL ENTIRE BOOKING
-  ===================================================== */
-
-  const cancelBooking = (bookingId) => {
-    const bookingToCancel = bookings.find(
-      (booking) => booking.id === bookingId
-    );
-
-    if (!bookingToCancel) {
-      return;
-    }
-
-    const confirmCancel = window.confirm(
-      "Are you sure you want to cancel the entire booking?"
-    );
-
-    if (!confirmCancel) {
-      return;
-    }
-
-    const updatedAllBookings = getBookings().filter(
-      (booking) => booking.id !== bookingId
-    );
-
-    localStorage.setItem(
-      "bookings",
-      JSON.stringify(updatedAllBookings)
-    );
-
-    setBookings(
-      bookings.filter(
-        (booking) => booking.id !== bookingId
-      )
-    );
-
-    /* Restore all seats */
-
-    restoreClassSeats(
-      bookingToCancel.trainId,
-      bookingToCancel.class,
-      bookingToCancel.seats
-    );
-
-    alert("Entire booking cancelled successfully.");
-  };
-
-  /* =====================================================
-     SUMMARY
-  ===================================================== */
-
-  const totalPassengers = bookings.reduce(
-    (total, booking) =>
-      total + (booking.passengers?.length || 0),
-    0
-  );
-
-  const totalRevenue = bookings.reduce(
-    (total, booking) =>
-      total + (Number(booking.totalFare) || 0),
-    0
-  );
+    return {
+      totalBookings: bookings.length,
+      confirmedBookings: confirmed.length,
+      cancelledBookings: cancelled.length,
+      confirmedPassengers: confirmed.reduce(
+        (total, booking) =>
+          total + Number(booking.passengerCount ?? booking.seats ?? 0),
+        0
+      ),
+      confirmedRevenue: confirmed.reduce(
+        (total, booking) => total + Number(booking.totalFare || 0),
+        0
+      ),
+    };
+  }, [bookings]);
 
   return (
     <>
-      {/* =====================================================
-          PAGE HEADER
-      ===================================================== */}
-
       <div className="page-header">
-
         <div className="container">
-
-          <div className="
-            d-flex
-            flex-wrap
-            justify-content-between
-            align-items-center
-            gap-3
-          ">
-
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-
-              <h2 className="
-                d-flex
-                align-items-center
-                gap-2
-              ">
-
+              <h2 className="d-flex align-items-center gap-2">
                 <FaTrain />
-
-                {train
-                  ? train.trainName
-                  : "Train Bookings"}
-
+                {train ? train.trainName : "Train Bookings"}
               </h2>
-
-              <p>
-
+              <p className="mb-0">
                 {train
                   ? `Train No. ${train.trainNumber} · ${train.source} → ${train.destination}`
-                  : "All bookings for this train"}
-
+                  : "Bookings stored in the database for this train"}
+                {train?.removed && (
+                  <span className="badge bg-secondary ms-2">
+                    Historical train
+                  </span>
+                )}
+                {train && train.isActive === false && !train.removed && (
+                  <span className="badge bg-secondary ms-2">
+                    Inactive train
+                  </span>
+                )}
               </p>
-
             </div>
 
-            <Link
-              to="/admin/bookings"
-              className="
-                btn
-                btn-light
-                d-flex
-                align-items-center
-                gap-2
-              "
-            >
-
-              <FaArrowLeft />
-
-              Back to Trains
-
-            </Link>
-
+            <div className="d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-light d-flex align-items-center gap-2"
+                onClick={() => loadData(true)}
+                disabled={loading || refreshing}
+              >
+                <FaSyncAlt className={refreshing ? "fa-spin" : ""} />
+                Refresh
+              </button>
+              <Link
+                to="/admin/bookings"
+                className="btn btn-light d-flex align-items-center gap-2"
+              >
+                <FaArrowLeft /> Back to Trains
+              </Link>
+            </div>
           </div>
-
         </div>
-
       </div>
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
-
       <div className="container page-body pb-5">
-
-        {/* =================================================
-            SUMMARY
-        ================================================= */}
-
-        <div className="row g-3 mb-4">
-
-          {/* Total Bookings */}
-
-          <div className="col-12 col-md-4">
-
-            <div className="stat-card">
-
-              <div
-                className="stat-icon"
-                style={{
-                  backgroundColor: "#1565d8",
-                }}
-              >
-                🎫
-              </div>
-
-              <div>
-
-                <div className="stat-value">
-                  {bookings.length}
-                </div>
-
-                <p className="stat-label">
-                  Total Bookings
-                </p>
-
-              </div>
-
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading bookings...</span>
             </div>
-
+            <p className="text-muted mt-2">Loading bookings from MySQL...</p>
           </div>
-
-          {/* Total Passengers */}
-
-          <div className="col-12 col-md-4">
-
-            <div className="stat-card">
-
-              <div
-                className="stat-icon"
-                style={{
-                  backgroundColor: "#16a34a",
-                }}
-              >
-                <FaUserFriends />
-              </div>
-
-              <div>
-
-                <div className="stat-value">
-                  {totalPassengers}
-                </div>
-
-                <p className="stat-label">
-                  Total Passengers
-                </p>
-
-              </div>
-
-            </div>
-
+        ) : error ? (
+          <div className="alert alert-danger" role="alert">
+            <strong>Unable to load database bookings.</strong>
+            <div>{error}</div>
+            <button
+              type="button"
+              className="btn btn-outline-danger btn-sm mt-3"
+              onClick={() => loadData(true)}
+            >
+              Try Again
+            </button>
           </div>
-
-          {/* Total Revenue */}
-
-          <div className="col-12 col-md-4">
-
-            <div className="stat-card">
-
-              <div
-                className="stat-icon"
-                style={{
-                  backgroundColor: "#f59e0b",
-                }}
-              >
-                ₹
-              </div>
-
-              <div>
-
-                <div className="stat-value">
-                  ₹{totalRevenue}
-                </div>
-
-                <p className="stat-label">
-                  Total Revenue
-                </p>
-
-              </div>
-
-            </div>
-
+        ) : !train && bookings.length === 0 ? (
+          <div className="alert alert-warning">
+            Train record was not found in the database, and no bookings exist
+            for train ID {trainId}.
           </div>
-
-        </div>
-
-        {/* =================================================
-            NO BOOKINGS
-        ================================================= */}
-
-        {bookings.length === 0 ? (
-
-          <div className="
-            card
-            text-center
-            p-4
-            p-md-5
-          ">
-
-            <div className="fs-1 mb-3">
-              🎫
-            </div>
-
-            <h4>
-              No Bookings For This Train
-            </h4>
-
-            <p className="text-muted mb-0">
-              No passenger has booked a ticket on this
-              train yet.
-            </p>
-
-          </div>
-
         ) : (
-
-          /* =================================================
-             BOOKINGS
-          ================================================= */
-
-          <div className="row g-4">
-
-            {bookings.map((booking) => (
-
-              <div
-                className="col-12"
-                key={booking.id}
-              >
-
-                <div className="card ticket-card">
-
-                  {/* =========================================
-                      BOOKING HEADER
-                  ========================================= */}
-
-                  <div className="ticket-head">
-
-                    <span className="
-                      d-flex
-                      align-items-center
-                      gap-2
-                      fw-semibold
-                    ">
-
-                      <FaEnvelope />
-
-                      {booking.passengerName
-                        ? `${booking.passengerName} · `
-                        : ""}
-
-                      {booking.passengerEmail}
-
-                    </span>
-
-                    {/* =====================================
-                        PNR + COPY BUTTON
-                    ===================================== */}
-
-                    <div className="
-                      d-flex
-                      align-items-center
-                      gap-2
-                      flex-wrap
-                    ">
-
-                      <span className="pnr-chip">
-
-                        PNR: {booking.pnr}
-
-                      </span>
-
-                      <button
-                        type="button"
-                        className={`
-                          btn
-                          btn-sm
-                          d-flex
-                          align-items-center
-                          gap-1
-                          ${
-                            copiedPnr === booking.pnr
-                              ? "btn-success"
-                              : "btn-light"
-                          }
-                        `}
-                        onClick={() =>
-                          handleCopyPNR(
-                            booking.pnr
-                          )
-                        }
-                      >
-
-                        {copiedPnr === booking.pnr ? (
-                          <>
-                            <FaCheck />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <FaCopy />
-                            Copy
-                          </>
-                        )}
-
-                      </button>
-
-                    </div>
-
+          <>
+            <div className="row g-3 mb-4">
+              <div className="col-12 col-md-4">
+                <div className="stat-card">
+                  <div className="stat-icon" style={{ backgroundColor: "#1565d8" }}>
+                    🎫
                   </div>
+                  <div>
+                    <div className="stat-value">{summary.totalBookings}</div>
+                    <p className="stat-label mb-0">Total Bookings</p>
+                    <small className="text-muted">
+                      {summary.confirmedBookings} confirmed · {summary.cancelledBookings} cancelled
+                    </small>
+                  </div>
+                </div>
+              </div>
 
-                  {/* =========================================
-                      BOOKING BODY
-                  ========================================= */}
+              <div className="col-12 col-md-4">
+                <div className="stat-card">
+                  <div className="stat-icon" style={{ backgroundColor: "#16a34a" }}>
+                    <FaUserFriends />
+                  </div>
+                  <div>
+                    <div className="stat-value">{summary.confirmedPassengers}</div>
+                    <p className="stat-label mb-0">Confirmed Passengers</p>
+                  </div>
+                </div>
+              </div>
 
-                  <div className="card-body p-4">
-
-                    <div className="row g-3">
-
-                      {/* Journey Date */}
-
-                      <div className="col-6 col-md-3">
-
-                        <span className="info-label">
-                          Journey Date
-                        </span>
-
-                        <p className="info-value">
-                          {formatDate(booking.date)}
-                        </p>
-
-                      </div>
-
-                      {/* Class */}
-
-                      <div className="col-6 col-md-3">
-
-                        <span className="info-label">
-                          Class
-                        </span>
-
-                        <p className="info-value">
-                          {getClassName(booking.class)}
-                        </p>
-
-                      </div>
-
-                      {/* Seats */}
-
-                      <div className="col-6 col-md-3">
-
-                        <span className="info-label">
-                          Seats Booked
-                        </span>
-
-                        <p className="info-value">
-                          {booking.seats}
-                        </p>
-
-                      </div>
-
-                      {/* Fare */}
-
-                      <div className="col-6 col-md-3">
-
-                        <span className="info-label">
-                          Total Fare
-                        </span>
-
-                        <p className="info-value">
-                          ₹{booking.totalFare}
-                        </p>
-
-                      </div>
-
+              <div className="col-12 col-md-4">
+                <div className="stat-card">
+                  <div className="stat-icon" style={{ backgroundColor: "#f59e0b" }}>
+                    ₹
+                  </div>
+                  <div>
+                    <div className="stat-value">
+                      {formatCurrency(summary.confirmedRevenue)}
                     </div>
+                    <p className="stat-label mb-0">Confirmed Revenue</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                    <hr />
+            {bookings.length === 0 ? (
+              <div className="card text-center p-4 p-md-5">
+                <div className="fs-1 mb-3">🎫</div>
+                <h4>No Bookings For This Train</h4>
+                <p className="text-muted mb-0">
+                  No booking records for this train were found in MySQL.
+                </p>
+              </div>
+            ) : (
+              <div className="row g-4">
+                {bookings.map((booking) => {
+                  const status = getBookingStatus(booking);
+                  const isCancelled = status === "CANCELLED";
+                  const passengers = Array.isArray(booking.passengers)
+                    ? booking.passengers
+                    : [];
 
-                    {/* =================================================
-                        PASSENGER DETAILS
-                    ================================================= */}
+                  return (
+                    <div className="col-12" key={booking.id ?? booking.bookingId}>
+                      <div className="card ticket-card">
+                        <div className="ticket-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+                          <span className="d-flex align-items-center gap-2 fw-semibold">
+                            <FaEnvelope />
+                            {booking.passengerName || "Passenger"}
+                            {booking.passengerEmail ? ` · ${booking.passengerEmail}` : ""}
+                          </span>
 
-                    <h6 className="fw-bold mb-3">
-                      Passenger Details
-                    </h6>
+                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                            <span className="pnr-chip">PNR: {booking.pnr || "N/A"}</span>
+                            <button
+                              type="button"
+                              className={`btn btn-sm d-flex align-items-center gap-1 ${
+                                copiedPnr === booking.pnr ? "btn-success" : "btn-light"
+                              }`}
+                              onClick={() => handleCopyPNR(booking.pnr)}
+                              disabled={!booking.pnr}
+                            >
+                              {copiedPnr === booking.pnr ? (
+                                <>
+                                  <FaCheck /> Copied
+                                </>
+                              ) : (
+                                <>
+                                  <FaCopy /> Copy
+                                </>
+                              )}
+                            </button>
+                            <span className={`badge ${isCancelled ? "bg-danger" : status === "CONFIRMED" ? "bg-success" : "bg-secondary"}`}>
+                              {status}
+                            </span>
+                            {status === "CONFIRMED" && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleCancelBooking(booking)}
+                              >
+                                Cancel Booking
+                              </button>
+                            )}
+                          </div>
+                        </div>
 
-                    <div className="row g-3">
-
-                      {booking.passengers?.map(
-                        (passenger, index) => (
-
-                          <div
-                            className="col-12 col-md-6"
-                            key={index}
-                          >
-
-                            <div className="passenger-row h-100">
-
-                              <div className="
-                                d-flex
-                                justify-content-between
-                                align-items-center
-                                mb-2
-                              ">
-
-                                <strong>
-                                  Passenger{" "}
-                                  {index + 1}
-                                </strong>
-
-                                {/* Individual Cancel */}
-
-                                {booking.passengers
-                                  ?.length > 1 && (
-
-                                  <button
-                                    type="button"
-                                    className="
-                                      btn
-                                      btn-outline-danger
-                                      btn-sm
-                                      d-flex
-                                      align-items-center
-                                      gap-1
-                                    "
-                                    onClick={() =>
-                                      cancelPassenger(
-                                        booking.id,
-                                        index
-                                      )
-                                    }
-                                  >
-
-                                    <FaTimesCircle />
-
-                                    Cancel
-
-                                  </button>
-
-                                )}
-
-                              </div>
-
-                              <div className="row g-2">
-
-                                {/* Name */}
-
-                                <div className="col-5">
-
-                                  <span className="info-label">
-                                    Name
-                                  </span>
-
-                                  <p className="info-value">
-                                    {passenger.name}
-                                  </p>
-
-                                </div>
-
-                                {/* Age */}
-
-                                <div className="col-3">
-
-                                  <span className="info-label">
-                                    Age
-                                  </span>
-
-                                  <p className="info-value">
-                                    {passenger.age}
-                                  </p>
-
-                                </div>
-
-                                {/* Gender */}
-
-                                <div className="col-4">
-
-                                  <span className="info-label">
-                                    Gender
-                                  </span>
-
-                                  <p className="info-value">
-                                    {passenger.gender}
-                                  </p>
-
-                                </div>
-
-                              </div>
-
+                        <div className="card-body p-4">
+                          <div className="row g-3">
+                            <div className="col-6 col-md-3">
+                              <span className="info-label">Journey Date</span>
+                              <p className="info-value">{formatDate(booking.date)}</p>
                             </div>
-
+                            <div className="col-6 col-md-3">
+                              <span className="info-label">Class</span>
+                              <p className="info-value">
+                                {booking.className || getClassName(booking.class)}
+                              </p>
+                            </div>
+                            <div className="col-6 col-md-3">
+                              <span className="info-label">Seats Booked</span>
+                              <p className="info-value">{booking.seats ?? booking.passengerCount ?? 0}</p>
+                            </div>
+                            <div className="col-6 col-md-3">
+                              <span className="info-label">Total Fare</span>
+                              <p className="info-value">{formatCurrency(booking.totalFare)}</p>
+                            </div>
                           </div>
 
-                        )
-                      )}
+                          <hr />
+                          <h6 className="fw-bold mb-3">Passenger Details</h6>
+                          {passengers.length === 0 ? (
+                            <p className="text-muted mb-0">
+                              No passenger detail records were returned by the database.
+                            </p>
+                          ) : (
+                            <div className="row g-3">
+                              {passengers.map((passenger, index) => (
+                                <div className="col-12 col-md-6" key={`${booking.id}-${index}`}>
+                                  <div className="passenger-row h-100">
+                                    <strong>Passenger {index + 1}</strong>
+                                    <div className="row g-2 mt-1">
+                                      <div className="col-5">
+                                        <span className="info-label">Name</span>
+                                        <p className="info-value">{passenger.name || "N/A"}</p>
+                                      </div>
+                                      <div className="col-3">
+                                        <span className="info-label">Age</span>
+                                        <p className="info-value">{passenger.age ?? "N/A"}</p>
+                                      </div>
+                                      <div className="col-4">
+                                        <span className="info-label">Gender</span>
+                                        <p className="info-value">{passenger.gender || "N/A"}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
 
+                        </div>
+                      </div>
                     </div>
-
-                    {/* =================================================
-                        CANCEL BOOKING
-                    ================================================= */}
-
-                    <div className="
-                      d-flex
-                      justify-content-end
-                      mt-4
-                    ">
-
-                      <button
-                        type="button"
-                        className="
-                          btn
-                          btn-danger
-                          d-flex
-                          align-items-center
-                          gap-2
-                        "
-                        onClick={() =>
-                          cancelBooking(booking.id)
-                        }
-                      >
-
-                        <FaTimesCircle />
-
-                        Cancel Booking
-
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
+                  );
+                })}
               </div>
-
-            ))}
-
-          </div>
-
+            )}
+          </>
         )}
-
       </div>
     </>
   );

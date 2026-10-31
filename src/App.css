@@ -991,3 +991,129 @@
     display: none !important;
   }
 }
+
+/* Admin Dashboard: confirmed/cancelled hover breakdown */
+
+.dashboard-hover-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-hover-card.has-split {
+  cursor: pointer;
+}
+
+.dashboard-hover-card:hover,
+.dashboard-hover-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--rb-shadow-lg);
+  z-index: 2;
+}
+
+.dashboard-stat-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboard-hint {
+  display: block;
+  margin-top: 4px;
+}
+
+/* Dashboard cards: 3D floating effect */
+.dashboard-hover-card {
+  position: relative;
+  overflow: visible !important;
+  isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dashboard-hover-card.has-split {
+  cursor: pointer;
+}
+
+.dashboard-hover-card.has-split:hover,
+.dashboard-hover-card.has-split:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(15, 35, 65, 0.2);
+  z-index: 100;
+}
+
+/* Popup floats over the card instead of going behind the header */
+.dashboard-breakdown {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 50%;
+  bottom: auto;
+  z-index: 101;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+
+  background: #ffffff;
+  border: 1px solid #d7e2f0;
+  border-radius: 16px;
+
+  box-shadow:
+    0 8px 16px rgba(15, 35, 65, 0.1),
+    0 18px 36px rgba(15, 35, 65, 0.2);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translateY(calc(-50% + 12px)) scale(0.96);
+  transform-origin: center;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.dashboard-hover-card.has-split:hover .dashboard-breakdown,
+.dashboard-hover-card.has-split:focus-visible .dashboard-breakdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+
+/* Green confirmed row */
+.dashboard-breakdown-row.confirmed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 10px;
+
+  color: #146c43;
+  background: linear-gradient(135deg, #e2f5eb, #c8ead8);
+  border: 1px solid #9fd4b8;
+}
+
+/* Red cancelled row */
+.dashboard-breakdown-row.cancelled {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 10px;
+
+  color: #b02a37;
+  background: linear-gradient(135deg, #fff0f1, #f8d7da);
+  border: 1px solid #f1aeb5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-hover-card,
+  .dashboard-breakdown {
+    transition: none;
+  }
+}
